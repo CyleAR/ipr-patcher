@@ -4,9 +4,8 @@ env:
   USER_AGENT: "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0"
 on:
   schedule:
-    - cron: 10 13 * * *
+    - cron: '*/5 * * * *'
   workflow_dispatch:
-  push:
 
 permissions:
   contents: write
