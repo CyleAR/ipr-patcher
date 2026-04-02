@@ -75,7 +75,7 @@ jobs:
       - name: Create a Release
         uses: softprops/action-gh-release@v2
         with:
-          body: "### Gaku ${{ env.APK_VERSION }} ready to update.\nThe '_embedded' and 'cloned' apk require the included version of Localify to function.\n**Other Localify versions will NOT work.**"
+          body: "### 학마 ${{ env.APK_VERSION }} 가 업데이트 준비 되었습니다.\n'_embedded' 로 끝나는 파일을 다운로드 받아 업데이트 해주세요.\n**다른 버전은 작동하지 않습니다.**\n '_cloned' 파일은 기존 학마 앱을 유지하고 싶은 사람을 위한 버전 입니다."
           tag_name: ${{ env.APK_VERSION }} 
           make_latest: true
           preserve_order: true
