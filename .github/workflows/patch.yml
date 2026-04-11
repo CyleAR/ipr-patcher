@@ -1,14 +1,17 @@
 name: Download and patch
 env:
-  # Global env vars that both jobs might use
   GAME_ID: "com.bandainamcoent.idolmaster_gakuen"
   USER_AGENT: "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0"
-
 
 on:
   schedule:
     - cron: 0 18 * * *
   workflow_dispatch:
+    inputs:
+      skip_version_check:
+        description: "Skip version check and force build"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -16,6 +19,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    if: ${{ !inputs.skip_version_check }}
     outputs:
       continue: ${{ steps.ver_check.outputs.continue }}
       apk_version: ${{ steps.ver_check.outputs.apk_version }}
@@ -37,7 +41,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: check
-    if: needs.check.outputs.continue == 'true'
+    if: ${{ always() && (inputs.skip_version_check || needs.check.outputs.continue == 'true') }}
 
     env:
       APK_VERSION: ${{ needs.check.outputs.apk_version }}
@@ -50,6 +54,14 @@ jobs:
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set env vars (skip mode)
+        if: ${{ inputs.skip_version_check }}
+        run: bash ver_check.sh
+        continue-on-error: true
 
       - name: Download and prepare modules
         run: bash download_modules.sh
@@ -71,12 +83,12 @@ jobs:
 
       - name: Patch the APK files
         run: bash patch.sh
-        
+
       - name: Create a Release
         uses: softprops/action-gh-release@v2
         with:
           body: "### 학마 ${{ env.APK_VERSION }} 가 업데이트 준비 되었습니다.\n'_embedded' 로 끝나는 파일을 다운로드 받아 업데이트 해주세요.\n**다른 버전은 작동하지 않습니다.**\n '_cloned' 파일은 기존 학마 앱을 유지하고 싶은 사람을 위한 버전 입니다."
-          tag_name: ${{ env.APK_VERSION }} 
+          tag_name: ${{ env.APK_VERSION }}
           make_latest: true
           preserve_order: true
           files: |
