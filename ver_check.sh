@@ -6,8 +6,7 @@
 
 apk_version=$(python play_ver_check/app.py)
 
-# LATEST_TAG="$(git describe --tags "$(git rev-list --tags --max-count=1)")"
-LATEST_TAG="$(git describe)"
+LATEST_TAG="$(git describe --tags "$(git rev-list --tags --max-count=1)" 2>/dev/null || echo "")"
 
 GAME_FILE_BASE=Gaku_$apk_version
 
