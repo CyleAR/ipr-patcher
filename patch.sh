@@ -27,7 +27,7 @@ NEW_PACKAGE_SLASH="com/bandainamcoent/idolmaster_gaku_kr"
 LOCALIFY_CLONED_DIR=localify_cloned_module
 LOCALIFY_CLONED_APK=localify_cloned_module.apk
 
-java -jar APKEditor.jar d -dex -i "$LOCALIFY_KR_NAME" -o $LOCALIFY_CLONED_DIR
+java -jar APKEditor.jar d -i "$LOCALIFY_KR_NAME" -o $LOCALIFY_CLONED_DIR
 grep -rIl "$OLD_PACKAGE" ./$LOCALIFY_CLONED_DIR | xargs sed -i "s/$OLD_PACKAGE/$NEW_PACKAGE/g"
 grep -rIl "$OLD_PACKAGE_SLASH" ./$LOCALIFY_CLONED_DIR | xargs sed -i "s|$OLD_PACKAGE_SLASH|$NEW_PACKAGE_SLASH|g"
 java -jar APKEditor.jar b -i $LOCALIFY_CLONED_DIR -o $LOCALIFY_CLONED_APK
