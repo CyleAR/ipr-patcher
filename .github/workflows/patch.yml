@@ -60,8 +60,7 @@ jobs:
 
       - name: Set env vars (skip mode)
         if: ${{ inputs.skip_version_check }}
-        run: bash ver_check.sh
-        continue-on-error: true
+        run: bash ver_check.sh --env-only
 
       - name: Download and prepare modules
         run: bash download_modules.sh
