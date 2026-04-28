@@ -1,16 +1,29 @@
 #!/bin/bash
 
-#headers=$(wget -q -S -U "$USER_AGENT" --start-pos 999999999 "$GAME_XAPK_LINK" 2>&1)
-#xapk_name=${headers##*=}
-#apk_version=${xapk_name%_*};apk_version=${apk_version##*_}
+set -euo pipefail
 
-apk_version=$(python play_ver_check/app.py)
+GAME_ID="${GAME_ID:-game.qualiarts.idolypride}"
+APKEEP_NAME=apkeep
+APKEEP_LINK=https://github.com/EFForg/apkeep/releases/latest/download/apkeep-x86_64-unknown-linux-gnu
 
-GAME_FILE_BASE=Gaku_$apk_version
+if [ ! -x "./$APKEEP_NAME" ]; then
+  aria2c -j16 "$APKEEP_LINK" -o "$APKEEP_NAME"
+  chmod +x "$APKEEP_NAME"
+fi
+
+version_list=$(./"$APKEEP_NAME" -l -a "$GAME_ID" -d apk-pure 2>/dev/null | tr -d '\r')
+apk_version=$(printf '%s\n' "$version_list" | grep -Eo '[0-9]+([.][0-9A-Za-z_-]+)+' | sort -V | tail -n 1)
+
+if [ -z "$apk_version" ]; then
+  echo "Could not determine latest version for $GAME_ID from APKPure."
+  exit 1
+fi
+
+GAME_FILE_BASE=IdolyPride_$apk_version
 
 echo "Latest app version: $apk_version"
 
-if [ "$1" = "--env-only" ]; then
+if [ "${1:-}" = "--env-only" ]; then
   {
     echo "APK_VERSION=$apk_version"
     echo "GAME_FILE_BASE=$GAME_FILE_BASE"

@@ -23,5 +23,5 @@ def main(app):
 
 
 if __name__ == "__main__":
-    app_id = 'com.bandainamcoent.idolmaster_gakuen'
+    app_id = 'game.qualiarts.idolypride'
     main(app_id)

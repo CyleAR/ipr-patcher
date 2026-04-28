@@ -1,7 +1,17 @@
 #!/bin/bash
 
-# CONFIG
-OPTIONS=locale=jp,timezone=UTC+9,split_apk=1,include_additional_files=true
-APP_ID=$1
+set -euo pipefail
 
-./apkeep -a "$APP_ID" -d google-play -o $OPTIONS -e "$PLAY_EMAIL" -t "$AAS_TOKEN" .
+APP_ID="${1:?APP_ID is required}"
+APKPURE_OPTIONS="${APKPURE_OPTIONS:-arch=arm64-v8a}"
+
+if [ -n "$APKPURE_OPTIONS" ]; then
+  ./apkeep -a "$APP_ID" -d apk-pure -o "$APKPURE_OPTIONS" .
+else
+  ./apkeep -a "$APP_ID" -d apk-pure .
+fi
+
+xapk_file=$(find . -maxdepth 1 -name '*.xapk' -print | head -n 1)
+if [ -n "$xapk_file" ]; then
+  unzip -o "$xapk_file" -d .
+fi

@@ -1,7 +1,6 @@
 name: Download and patch
 env:
-  GAME_ID: "com.bandainamcoent.idolmaster_gakuen"
-  USER_AGENT: "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0"
+  GAME_ID: "game.qualiarts.idolypride"
 
 on:
   schedule:
@@ -48,8 +47,6 @@ jobs:
       GAME_FILE_BASE: ${{ needs.check.outputs.game_file_base }}
       GAME_APK_NAME: ${{ needs.check.outputs.game_apk_name }}
       GAME_CLONED_NAME: ${{ needs.check.outputs.game_cloned_name }}
-      PLAY_EMAIL: ${{ secrets.PLAY_EMAIL }}
-      AAS_TOKEN: ${{ secrets.AAS_TOKEN }}
 
     steps:
       - name: Checkout the repo
@@ -72,10 +69,21 @@ jobs:
           java-version: "21"
           java-package: "jre"
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install UnityPy
+
       - name: Download and prepare APK file
         run: |
           bash play_downloader.sh ${{ env.GAME_ID }}
           java -jar APKEditor.jar m -i ${{ env.GAME_ID }} -o ${{ env.GAME_APK_NAME }}
+
+      - name: Patch game font
+        run: bash patch_game_font.sh
 
       - name: Prepare cloned APK file
         run: bash clone.sh
@@ -86,7 +94,7 @@ jobs:
       - name: Create a Release
         uses: softprops/action-gh-release@v2
         with:
-          body: "### 학마 ${{ env.APK_VERSION }} 가 업데이트 준비 되었습니다.\n'_embedded' 로 끝나는 파일을 다운로드 받아 업데이트 해주세요.\n**다른 버전은 작동하지 않습니다.**\n '_cloned' 파일은 기존 학마 앱을 유지하고 싶은 사람을 위한 버전 입니다."
+          body: "Idoly Pride ${{ env.APK_VERSION }} patch build. Use the '_embedded' APK for updates. The '_cloned' APK is the alternate package build."
           tag_name: ${{ env.APK_VERSION }}
           make_latest: true
           preserve_order: true
@@ -95,4 +103,3 @@ jobs:
             ${{ env.EMBED_APK_CLONED }}
             ${{ env.EMBED_APK }}
             ${{ env.PATCHED_APK }}
-            ${{ env.EMBED_APK_CN }}

@@ -20,10 +20,10 @@ mv "$embed_apk" ./"$GAME_EMBEDDED_APK"
 
 if [ -f "$GAME_CLONED_NAME" ]
 then
-OLD_PACKAGE="com.bandainamcoent.idolmaster_gakuen"
-NEW_PACKAGE="com.bandainamcoent.idolmaster_gaku_kr"
-OLD_PACKAGE_SLASH="com/bandainamcoent/idolmaster_gakuen"
-NEW_PACKAGE_SLASH="com/bandainamcoent/idolmaster_gaku_kr"
+OLD_PACKAGE="game.qualiarts.idolypride"
+NEW_PACKAGE="game.qualiarts.idolypride_kr"
+OLD_PACKAGE_SLASH="game/qualiarts/idolypride"
+NEW_PACKAGE_SLASH="game/qualiarts/idolypride_kr"
 LOCALIFY_CLONED_DIR=localify_cloned_module
 LOCALIFY_CLONED_APK=localify_cloned_module.apk
 
