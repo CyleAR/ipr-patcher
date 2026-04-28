@@ -22,23 +22,24 @@ if [ ! -d "$ASSET_DIR" ]; then
   exit 1
 fi
 
-if [ ! -f "$ASSET_PATH" ]; then
-  if [ ! -f "${ASSET_PATH}.split0" ]; then
-    echo "Unity asset file not found: $ASSET_PATH"
-    exit 1
-  fi
-
+if [ -f "${ASSET_PATH}.split0" ]; then
   echo "Rebuilding split Unity asset: $ASSET_PATH"
   rm -f "$ASSET_PATH"
   while IFS= read -r split_file; do
     cat "$split_file" >> "$ASSET_PATH"
   done < <(find "$ASSET_DIR" -maxdepth 1 -type f -name 'sharedassets0.assets.split*' -print | sort -V)
+elif [ ! -f "$ASSET_PATH" ]; then
+  echo "Unity asset file not found: $ASSET_PATH"
+  exit 1
 fi
 
 if [ ! -f "$ASSET_PATH" ]; then
   echo "Unity asset rebuild failed: $ASSET_PATH"
   exit 1
 fi
+
+find "$ASSET_DIR" -maxdepth 1 -type f -name 'sharedassets0.assets.split*' -delete
+ls -lh "$ASSET_PATH"
 
 echo "Using Unity asset file: $ASSET_PATH"
 python3 patch_font.py "$ASSET_PATH" "$FONT_FILE"
