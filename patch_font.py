@@ -42,9 +42,12 @@ out_dir = asset_path if os.path.isdir(asset_path) else os.path.dirname(asset_pat
 if not out_dir:
     out_dir = "."
 
-# env.save() 대신 직접 파일을 하나씩 원래 위치에 저장합니다.
+# env.save() 대신 우리가 수정한 파일만 골라서 저장합니다.
 for fname, file in env.files.items():
-    # .save() 메소드가 있는 파일 객체만 처리합니다.
+    # 타겟 파일(sharedassets0.assets)이 포함된 경우만 처리
+    if "sharedassets0.assets" not in fname:
+        continue
+        
     if not hasattr(file, "save"):
         continue
         
@@ -54,16 +57,15 @@ for fname, file in env.files.items():
     try:
         with open(save_path, "wb") as f:
             f.write(file.save())
-        print(f"Successfully saved: {save_path}")
+        print(f"Successfully saved patched asset: {save_path}")
 
         # 조각 파일들이 있었다면, 새로 합쳐서 저장한 파일과 충돌하지 않게 지워줍니다.
-        if "sharedassets0.assets" in clean_name:
-            for i in range(100): # .split0 ~ .split99
-                split_file = f"{save_path}.split{i}"
-                if os.path.exists(split_file):
-                    os.remove(split_file)
-                    print(f"Removed old split file: {split_file}")
+        for i in range(100): # .split0 ~ .split99
+            split_file = f"{save_path}.split{i}"
+            if os.path.exists(split_file):
+                os.remove(split_file)
+                print(f"Removed old split file: {split_file}")
     except Exception as e:
-        print(f"Skipping {clean_name} due to save error: {e}")
+        print(f"Error saving {clean_name}: {e}")
 
 print("Font replacement completed successfully.")
