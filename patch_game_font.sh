@@ -37,4 +37,4 @@ python3 patch_font.py "$ASSET_PATH" "$FONT_FILE"
 
 java -jar APKEditor.jar b -i "$PATCH_DIR" -o "$PATCHED_APK"
 echo "FONT_PATCHED_APK=$PATCHED_APK" >> "$GITHUB_ENV"
-mv "$PATCHED_APK" "$GAME_APK_NAME"
+cp "$PATCHED_APK" "$GAME_APK_NAME"
