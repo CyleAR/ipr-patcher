@@ -20,7 +20,7 @@ for obj in env.objects:
         continue
 
     data = obj.read()
-    font_name = getattr(data, "name", None) or getattr(data, "m_Name", None)
+    font_name = getattr(data, "m_Name", None)
     if not font_name:
         print("Warning: skipping Font object without a readable name.")
         continue
