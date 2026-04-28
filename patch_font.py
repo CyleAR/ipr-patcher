@@ -38,13 +38,25 @@ if not font_replaced:
 
 # 4. 저장 작업
 print("Saving modified assets...")
-# 폴더면 그 폴더에, 파일이면 그 파일이 속한 폴더에 저장
 out_dir = asset_path if os.path.isdir(asset_path) else os.path.dirname(asset_path)
 if not out_dir:
     out_dir = "."
 
-# env.save(out_dir)는 분할된 파일(split0, split1...)들을 
-# 각각의 원래 이름대로 다시 쪼개서 저장해 줍니다.
-env.save(out_dir)
+# env.save() 대신 직접 파일을 하나씩 원래 위치에 저장합니다.
+for fname, file in env.files.items():
+    clean_name = os.path.basename(fname)
+    save_path = os.path.join(out_dir, clean_name)
+    
+    with open(save_path, "wb") as f:
+        f.write(file.save())
+    print(f"Successfully saved: {save_path}")
+
+    # 조각 파일들이 있었다면, 새로 합쳐서 저장한 파일과 충돌하지 않게 지워줍니다.
+    if "sharedassets0.assets" in clean_name:
+        for i in range(100): # .split0 ~ .split99
+            split_file = f"{save_path}.split{i}"
+            if os.path.exists(split_file):
+                os.remove(split_file)
+                print(f"Removed old split file: {split_file}")
 
 print("Font replacement completed successfully.")
