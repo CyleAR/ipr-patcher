@@ -23,13 +23,13 @@ if [ ! -d "$ASSET_DIR" ]; then
 fi
 
 if [ -f "${ASSET_PATH}.split0" ]; then
-  echo "Split Unity assets detected in: $ASSET_DIR"
-  TARGET_PATH="$ASSET_DIR"
+  echo "Targeting split asset starting with: ${ASSET_PATH}.split0"
+  TARGET_PATH="${ASSET_PATH}.split0"
 elif [ -f "$ASSET_PATH" ]; then
   echo "Single Unity asset detected: $ASSET_PATH"
   TARGET_PATH="$ASSET_PATH"
 else
-  echo "Unity asset not found in $ASSET_DIR"
+  echo "Unity asset not found: $ASSET_PATH"
   exit 1
 fi
 

@@ -38,34 +38,25 @@ if not font_replaced:
 
 # 4. 저장 작업
 print("Saving modified assets...")
-out_dir = asset_path if os.path.isdir(asset_path) else os.path.dirname(asset_path)
-if not out_dir:
-    out_dir = "."
+out_dir = os.path.dirname(asset_path) or "."
 
-# env.save() 대신 우리가 수정한 파일만 골라서 저장합니다.
 for fname, file in env.files.items():
-    # 타겟 파일(sharedassets0.assets)이 포함된 경우만 처리
+    # 우리가 수정하려고 했던 sharedassets0.assets와 관련된 것만 저장합니다.
     if "sharedassets0.assets" not in fname:
         continue
         
-    if not hasattr(file, "save"):
-        continue
-        
-    clean_name = os.path.basename(fname)
-    save_path = os.path.join(out_dir, clean_name)
+    save_path = os.path.join(out_dir, "sharedassets0.assets")
     
-    try:
-        with open(save_path, "wb") as f:
-            f.write(file.save())
-        print(f"Successfully saved patched asset: {save_path}")
+    with open(save_path, "wb") as f:
+        f.write(file.save())
+    print(f"Successfully saved patched asset: {save_path}")
 
-        # 조각 파일들이 있었다면, 새로 합쳐서 저장한 파일과 충돌하지 않게 지워줍니다.
-        for i in range(100): # .split0 ~ .split99
-            split_file = f"{save_path}.split{i}"
-            if os.path.exists(split_file):
-                os.remove(split_file)
-                print(f"Removed old split file: {split_file}")
-    except Exception as e:
-        print(f"Error saving {clean_name}: {e}")
+    # 기존 조각 파일들(.split0, .split1...) 삭제
+    for i in range(100):
+        split_file = f"{save_path}.split{i}"
+        if os.path.exists(split_file):
+            os.remove(split_file)
+            print(f"Removed old split file: {split_file}")
+    break 
 
 print("Font replacement completed successfully.")
