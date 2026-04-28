@@ -41,6 +41,6 @@ if not font_replaced:
 
 print("Saving modified asset file...")
 with open(asset_path, "wb") as f:
-    f.write(env.file.save())
+    f.write(env.save())
 
 print("Font replacement completed.")
