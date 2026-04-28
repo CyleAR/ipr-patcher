@@ -7,17 +7,17 @@ asset_path = sys.argv[1]
 custom_font_path = sys.argv[2]
 target_font_name = sys.argv[3] if len(sys.argv) > 3 else "SourceSansPro-Regular"
 
-# 1. 커스텀 폰트 로드
 print(f"[{custom_font_path}] Loading font file...")
 with open(custom_font_path, "rb") as f:
     new_font_data = f.read()
 
-# 2. 에셋 파일 로드
 print(f"[{asset_path}] Opening asset file...")
 env = UnityPy.load(asset_path)
 font_replaced = False
 
-# 3. 폰트 교체 작업
+# 디버깅: 내부 파일 구성 확인
+print(f"DEBUG: Internal files in environment: {list(env.files.keys())}")
+
 for obj in env.objects:
     if obj.type.name != "Font":
         continue
@@ -40,14 +40,23 @@ if not font_replaced:
     print(f"Warning: target font '{target_font_name}' was not found.")
     sys.exit(1)
 
-# 4. 저장 작업 (핵심 수정 부분)
 print("Saving modified asset file...")
-out_dir = os.path.dirname(asset_path)
-if not out_dir:
-    out_dir = "."
+out_dir = os.path.dirname(asset_path) or "."
+print(f"DEBUG: Target out_dir is '{out_dir}'")
 
-# env.save(out_dir)는 파일 안에 든 모든 데이터(sharedassets0.assets 등)를 
-# 지정된 폴더에 원래 파일명대로 안전하게 저장합니다.
-env.save(out_dir)
+# 방법 1: env.save() 시도 (강제로 keyword 인자 사용)
+try:
+    env.save(out_path = out_dir)
+    print("Saved using env.save(out_path=out_dir)")
+except Exception as e:
+    print(f"env.save failed: {e}. Trying manual save...")
+    # 방법 2: 수동 저장 (env.save가 실패할 경우의 대비책)
+    for fname, file in env.files.items():
+        # 파일명이 경로를 포함하고 있을 수 있으므로 basename만 취함
+        clean_name = os.path.basename(fname)
+        save_path = os.path.join(out_dir, clean_name)
+        with open(save_path, "wb") as f:
+            f.write(file.save())
+        print(f"Manually saved: {save_path}")
 
 print("Font replacement completed.")
