@@ -101,6 +101,7 @@ jobs:
           files: |
             ${{ env.LOCALIFY_KR_NAME }}
             ${{ env.FONT_PATCHED_APK }}
-            ${{ env.EMBED_APK_CLONED }}
+            ${{ env.MANAGER_APK }}
+            ${{ env.LOCAL_APK }}
             ${{ env.EMBED_APK }}
-            ${{ env.PATCHED_APK }}
+            ${{ env.EMBED_APK_CLONED }}
