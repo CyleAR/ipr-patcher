@@ -6,7 +6,7 @@ GAME_EMBEDDED_CLONED="$GAME_EMBEDDED_BASE"_cloned.apk
 
 java -jar lspatch.jar -l 2 --manager "$GAME_APK_NAME" -o ls_patched
 
-java -jar lspatch_embed.jar "$GAME_APK_NAME" -m "$LOCALIFY_KR_NAME" -o localify --force
+java -jar lspatch.jar "$GAME_APK_NAME" -m "$LOCALIFY_KR_NAME" -o localify --force
 
 patched_apk=$(find ./ls_patched/*.apk)
 embed_apk=$(find ./localify/*.apk)
@@ -32,7 +32,7 @@ grep -rIl "$OLD_PACKAGE" ./$LOCALIFY_CLONED_DIR | xargs sed -i "s/$OLD_PACKAGE/$
 grep -rIl "$OLD_PACKAGE_SLASH" ./$LOCALIFY_CLONED_DIR | xargs sed -i "s|$OLD_PACKAGE_SLASH|$NEW_PACKAGE_SLASH|g"
 java -jar APKEditor.jar b -i $LOCALIFY_CLONED_DIR -o $LOCALIFY_CLONED_APK
 
-java -jar lspatch_embed.jar "$GAME_CLONED_NAME" -m "$LOCALIFY_CLONED_APK" -o localify_cloned --force
+java -jar lspatch.jar "$GAME_CLONED_NAME" -m "$LOCALIFY_CLONED_APK" -o localify_cloned --force
 embed_apk_cloned=$(find ./localify_cloned/*.apk)
 mv "$embed_apk_cloned" ./"$GAME_EMBEDDED_CLONED"
 echo "EMBED_APK_CLONED=$GAME_EMBEDDED_CLONED" >> "$GITHUB_ENV"
