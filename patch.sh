@@ -4,14 +4,22 @@ GAME_EMBEDDED_BASE="$GAME_FILE_BASE"_embedded
 GAME_EMBEDDED_APK="$GAME_EMBEDDED_BASE".apk
 GAME_EMBEDDED_CLONED="$GAME_EMBEDDED_BASE"_cloned.apk
 
-java -jar lspatch.jar -l 2 --manager "$GAME_APK_NAME" -o ls_patched
+rm -rf ls_patched localify
+mkdir -p ls_patched localify
 
-java -jar lspatch.jar "$GAME_APK_NAME" -m "$LOCALIFY_KR_NAME" -o localify --force
+# Use the font-patched APK as base if available, otherwise use original
+BASE_APK="${FONT_PATCHED_APK:-$GAME_APK_NAME}"
+echo "Using $BASE_APK as base for LSPatch..."
 
-patched_apk=$(find ./ls_patched/*.apk)
-embed_apk=$(find ./localify/*.apk)
+java -jar lspatch.jar -l 2 --manager "$BASE_APK" -o ls_patched
+java -jar lspatch.jar "$BASE_APK" -m "$LOCALIFY_KR_NAME" -o localify --force
 
-mv "$embed_apk" ./"$GAME_EMBEDDED_APK"
+patched_apk=$(find ./ls_patched/*.apk | head -n 1)
+embed_apk=$(find ./localify/*.apk | head -n 1)
+
+if [ -f "$embed_apk" ]; then
+    mv "$embed_apk" ./"$GAME_EMBEDDED_APK"
+fi
 
 {
     echo "PATCHED_APK=$patched_apk";

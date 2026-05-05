@@ -7,7 +7,11 @@ IDOLYPRIDE_JP="アイプラ"
 IDOLYPRIDE_KR="아이프라"
 
 NAME_FILE="./$APK_EXTRACT_DIR/resources/package_1/res/values/strings.xml"
-java -jar APKEditor.jar d -t xml -dex -i "$GAME_APK_NAME" -o $APK_EXTRACT_DIR
+rm -rf "$APK_EXTRACT_DIR"
+BASE_APK="${FONT_PATCHED_APK:-$GAME_APK_NAME}"
+echo "Cloning $BASE_APK..."
+
+java -jar APKEditor.jar d -t xml -dex -i "$BASE_APK" -o "$APK_EXTRACT_DIR"
 
 grep -rIl "$OLD_PACKAGE_NAME" ./$APK_EXTRACT_DIR | xargs sed -i "s/$OLD_PACKAGE_NAME/$NEW_PACKAGE_NAME/g"
 sed -i "s/$IDOLYPRIDE_JP/$IDOLYPRIDE_KR/g" $NAME_FILE
