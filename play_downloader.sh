@@ -3,7 +3,7 @@
 set -euo pipefail
 
 APP_ID="${1:?APP_ID is required}"
-APKPURE_OPTIONS="${APKPURE_OPTIONS:-arch=arm64-v8a}"
+APKPURE_OPTIONS="${APKPURE_OPTIONS:-acknowledge_dangers=true,arch=arm64-v8a}"
 DOWNLOAD_DIR="$APP_ID"
 
 rm -rf "$DOWNLOAD_DIR"
