@@ -59,6 +59,11 @@ jobs:
         if: ${{ inputs.skip_version_check }}
         run: bash ver_check.sh --env-only
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
       - name: Download and prepare modules
         run: bash download_modules.sh
         env:
@@ -70,11 +75,6 @@ jobs:
           distribution: "zulu"
           java-version: "21"
           java-package: "jre"
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.11"
 
       - name: Install Python dependencies
         run: pip install UnityPy
@@ -93,16 +93,68 @@ jobs:
       - name: Patch the APK files
         run: bash patch.sh
 
+      - name: Prepare management APK for release
+        run: |
+          release_apk="${LOCALIFY_LITE_NAME%_lite.apk}.apk"
+          cp "$LOCALIFY_LITE_NAME" "$release_apk"
+          echo "LOCALIFY_RELEASE_NAME=$release_apk" >> "$GITHUB_ENV"
+
+      - name: Verify all release APKs
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          required = ["LOCALIFY_RELEASE_NAME", "FONT_PATCHED_APK", "EMBED_APK_CLONED", "EMBED_APK", "PATCHED_APK"]
+          paths = []
+          for name in required:
+              value = os.environ.get(name, "").strip()
+              if not value:
+                  raise RuntimeError(f"Required release variable is empty: {name}")
+              path = Path(value)
+              if not path.is_file() or path.stat().st_size == 0:
+                  raise RuntimeError(f"Required release APK is missing or empty: {path}")
+              with ZipFile(path) as apk:
+                  if "AndroidManifest.xml" not in apk.namelist():
+                      raise RuntimeError(f"Release APK has no AndroidManifest.xml: {path}")
+              paths.append(path.resolve())
+              print(f"Verified {name}: {path}")
+          if len(set(paths)) != len(required):
+              raise RuntimeError("Release APK paths must be distinct")
+          PY
+
       - name: Create a Release
         uses: softprops/action-gh-release@v2
         with:
-          body: "Idoly Pride ${{ env.APK_VERSION }} patch build. Use the '_embedded' APK for updates. The '_cloned' APK is the alternate package build."
+          body: |
+            아이돌리 프라이드 ${{ env.APK_VERSION }} 한국어 패치입니다.
+            - **일반 버전 (`_embedded.apk`)**: 신규 설치 및 기존 패치된 게임 앱 업데이트용입니다(권장).
+            - **별도 설치 버전 (`_embedded_cloned.apk`)**: 원본 게임을 삭제하지 않고 함께 설치할 수 있습니다. 원본 게임을 유지하고 싶다면 이 버전을 선택하세요(비권장).
+
+            한글 패치 설정을 변경하거나 새로운 번역 데이터를 받으려면 **관리앱 (`${{ env.LOCALIFY_RELEASE_NAME }}`)**을 설치해 주세요. 이후 번역 데이터 업데이트는 관리앱의 API 업데이트 기능으로 받을 수 있습니다.
           tag_name: ${{ env.APK_VERSION }}
           make_latest: true
           preserve_order: true
+          overwrite_files: true
+          fail_on_unmatched_files: true
           files: |
-            ${{ env.LOCALIFY_KR_NAME }}
+            ${{ env.LOCALIFY_RELEASE_NAME }}
             ${{ env.FONT_PATCHED_APK }}
             ${{ env.EMBED_APK_CLONED }}
             ${{ env.EMBED_APK }}
             ${{ env.PATCHED_APK }}
+
+      - name: Remove obsolete management APKs from release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          assets="$(gh release view "$APK_VERSION" --json assets --jq '.assets[].name')"
+          while IFS= read -r asset; do
+            case "$asset" in
+              "$LOCALIFY_RELEASE_NAME") ;;
+              HoshimiLocalify_v*.apk)
+                gh release delete-asset "$APK_VERSION" "$asset" --yes
+                ;;
+            esac
+          done <<< "$assets"
